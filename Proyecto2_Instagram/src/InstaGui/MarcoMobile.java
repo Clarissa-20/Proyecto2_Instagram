@@ -27,6 +27,7 @@ public class MarcoMobile extends JFrame {
         mainContainer = new JPanel(cardLayout);
 
         mainContainer.add(new Login(this), "LOGIN");
+        mainContainer.add(new CrearCuenta(this), "REGISTRO");
 
         add(mainContainer);
     }
