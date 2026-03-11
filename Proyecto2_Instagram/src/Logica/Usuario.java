@@ -12,6 +12,8 @@ import java.util.Date;
  * @author HP
  */
 public class Usuario implements Serializable{
+    private static final long serialVersionUID = 1L;
+    
     private String nombre;
     private char genero;
     private String usuario;
@@ -20,17 +22,20 @@ public class Usuario implements Serializable{
     private int edad;
     private boolean activo;
     private String rutaFotoPerfil;
+    private String bio;
     private boolean esPublico;
     
-    public Usuario(String nombre, char genero, String usuario, String password, Date fechaingreso, int edad, boolean activo, boolean esPublico){
+    public Usuario(String nombre, char genero, String usuario, String password, int edad, String rutaFoto, String bio, boolean esPublico){
         this.nombre = nombre;
         this.genero = genero;
         this.usuario = usuario;
         this.password = password;
-        this.fechaIngreso = new Date();
         this.edad = edad;
+        this.rutaFotoPerfil = rutaFoto;
+        this.bio =  bio;
+        this.fechaIngreso = new Date();
         this.activo = true;
-        this.esPublico = true;
+        this.esPublico = esPublico;
     }
     
     public String getNombre(){
@@ -85,8 +90,16 @@ public class Usuario implements Serializable{
         return rutaFotoPerfil;
     }
     
-    public void setutaFotoPerfil(String ruta){
+    public void setRutaFotoPerfil(String ruta){
         this.rutaFotoPerfil = ruta;
+    }
+    
+    public String getBio(){
+        return bio;
+    }
+    
+    public void setBio(String bio){
+        this.bio = bio;
     }
     
     public boolean isEsPublico(){
