@@ -5,6 +5,7 @@
 package Logica;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Date;
 
 /**
@@ -24,6 +25,7 @@ public class Usuario implements Serializable{
     private String rutaFotoPerfil;
     private String bio;
     private boolean esPublico;
+    private ArrayList<String> siguiendo;
     
     public Usuario(String nombre, char genero, String usuario, String password, int edad, String rutaFoto, String bio, boolean esPublico){
         this.nombre = nombre;
@@ -36,6 +38,7 @@ public class Usuario implements Serializable{
         this.fechaIngreso = new Date();
         this.activo = true;
         this.esPublico = esPublico;
+        this.siguiendo = new ArrayList<>();
     }
     
     public String getNombre(){
@@ -108,5 +111,12 @@ public class Usuario implements Serializable{
     
     public void setEsPublico(boolean esPublico){
         this.esPublico = esPublico;
+    }
+    
+    public ArrayList<String> getSiguiendo(){
+        if(this.siguiendo == null){
+            this.siguiendo = new ArrayList<>();
+        }
+        return siguiendo;
     }
 }

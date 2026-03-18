@@ -2,7 +2,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package InstaGUI;
+package InstaGui;
 
 import Logica.GestorInsta;
 import Logica.Insta;
@@ -79,7 +79,7 @@ public class vtnCrearInsta extends JDialog {
 
         JLabel labelDesc = new JLabel("Añade una descripción");
         labelDesc.setAlignmentX(Component.CENTER_ALIGNMENT);
-        labelDesc.setForeground(COLOR_TEXTO); // Texto blanco
+        labelDesc.setForeground(COLOR_TEXTO); 
         panelContenido.add(labelDesc);
         panelContenido.add(Box.createVerticalStrut(10));
 

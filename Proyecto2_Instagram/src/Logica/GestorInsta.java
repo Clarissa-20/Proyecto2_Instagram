@@ -5,6 +5,7 @@
 package Logica;
 
 import Constantes.Constante;
+import static Logica.ManejoArchivosBinarios.leerTodosLosUsuarios;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -17,56 +18,28 @@ import javax.swing.JOptionPane;
  *
  * @author HP
  */
+
 public class GestorInsta {
 
-    /*public static void crearNuevaCuenta(Usuario nuevoUsuario) throws UsernameYaExiste, IOException {
-        String username = nuevoUsuario.getUsuario();
+    private static final String RAIZ = "INSTA_RAIZ";
 
-        ArrayList<Usuario> listaUsuarios = ManejoArchivosBinarios.leerTodosLosUsuarios();
-
-        for (Usuario u : listaUsuarios) {
-            if (u.getUsuario().equalsIgnoreCase(username)) {
-                throw new UsernameYaExiste("El username " + username + " no está disponible.");
-            }
-        }
-
-        nuevoUsuario.setActivo(true);
-        listaUsuarios.add(nuevoUsuario);
-
-        try {
-            ManejoArchivosBinarios.reescribirListaCompletaUsuarios(listaUsuarios);
-        } catch (IOException e) {
-            JOptionPane.showMessageDialog(null, "Error al registrar usuario: Falló la escritura en users.ins.");
-            System.err.println("Error al guardar el usuario en users.ins: " + e.getMessage());
-            throw new IOException("Fallo al registrar usuario en users.ins");
-        }
-
-        try {
-            GestorCarpetasUsuario.CrearEstructuraUsuario(username);  //ERROR AQUI
-            System.out.println("Estructura de archivos creada para: " + username);
-        } catch (Throwable ignorar) {
-            System.err.println("Advertencia: Falló la creasción de la estructura de carpetas personales.");
-        }
-
-        System.out.println("Cuenta creada, debe abrir la ventana principal de INSTA.");
-    }*/
     public static void crearNuevaCuenta(Usuario nuevoUsuario) throws UsernameYaExiste, IOException {
         String username = nuevoUsuario.getUsuario();
-        ArrayList<Usuario> listaUsuarios = ManejoArchivosBinarios.leerTodosLosUsuarios();
 
-        for (Usuario u : listaUsuarios) {
-            if (u.getUsuario().equalsIgnoreCase(username)) {
-                throw new UsernameYaExiste("El username " + username + " no está disponible.");
-            }
+        if (ManejoArchivosBinarios.existeUsername(username)) {
+            throw new UsernameYaExiste("El username " + username + " no está disponible.");
         }
 
-        if (GestorSistemaArchivos.crearEstructuraUsuario(username)) {
-            nuevoUsuario.setActivo(true);
-            listaUsuarios.add(nuevoUsuario);
-            ManejoArchivosBinarios.reescribirListaCompletaUsuarios(listaUsuarios);
-        } else {
-            throw new IOException("No se pudo crear el directorio del usuario.");
+        File carpetaUsuario = new File(RAIZ + File.separator + username);
+
+        if (!carpetaUsuario.exists() && !carpetaUsuario.mkdirs()) {
+            throw new IOException("No se pudo crear el directorio del usuario en: " + carpetaUsuario.getAbsolutePath());
         }
+
+        new File(carpetaUsuario, "imagenes").mkdirs();
+
+        nuevoUsuario.setActivo(true);
+        ManejoArchivosBinarios.escribirUsuario(nuevoUsuario);
     }
 
     public static ArrayList<Insta> generarTimeLine(String usuarioActual) throws IOException {
@@ -77,14 +50,12 @@ public class GestorInsta {
             return timeLine;
         }
 
-        String rutaFollowing = Constante.RUTA_BASE + usuarioActual + "\\following.ins";
+        String rutaFollowing = RAIZ + File.separator + usuarioActual + File.separator + "following.ins";
         ArrayList<Follow> seguidos = ManejoArchivosBinarios.leerListaFollows(rutaFollowing);
 
         for (Follow f : seguidos) {
             if (f.isActivo()) {
-
                 Usuario usuarioSeguido = buscarUsuarioPorUsername(f.getUsername());
-
                 if (usuarioSeguido != null) {
                     String clavePosts = usuarioSeguido.getUsuario();
                     timeLine.addAll(ManejoArchivosBinarios.leerInstasDeUsuario(clavePosts));
@@ -164,18 +135,9 @@ public class GestorInsta {
 
         for (Usuario u : listaUsuarios) {
             if (u.getUsuario().equalsIgnoreCase(username)) {
-
                 boolean estadoActual = u.isActivo();
                 estadoFinal = !estadoActual;
-
                 u.setActivo(estadoFinal);
-
-                if (!estadoFinal) {
-                    System.out.println("Cuenta de " + username + " Desactivada");
-                } else {
-                    System.out.println("Cuenta de " + username + " Activada");
-                }
-
                 estadoCambiado = true;
                 break;
             }
@@ -185,19 +147,16 @@ public class GestorInsta {
             throw new IOException("Usuario no encontrado para la actualizacion.");
         }
 
-        System.out.println("DEBUG: Tamaño de la lista antes de escribir: " + listaUsuarios.size());
         ManejoArchivosBinarios.reescribirListaCompletaUsuarios(listaUsuarios);
-
         return estadoFinal;
     }
 
     public static int contarFollows(String username, boolean esFollowing) throws IOException {
         String nombreArchivo = esFollowing ? "following.ins" : "followers.ins";
-        String rutaArchivo = Constante.RUTA_BASE + username + File.separator + nombreArchivo;
+        String rutaArchivo = RAIZ + File.separator + username + File.separator + nombreArchivo;
         ArrayList<Follow> lista = ManejoArchivosBinarios.leerListaFollows(rutaArchivo);
 
         int contador = 0;
-
         for (Follow f : lista) {
             if (f.isActivo()) {
                 contador++;
@@ -207,47 +166,44 @@ public class GestorInsta {
     }
 
     public static void actualizarEstadoFollow(String seguidor, String seguido, boolean estado) throws IOException {
-        String rutaFollowing = Constante.RUTA_BASE + seguidor + File.separator + "\\following.ins";
+        String rutaFollowing = RAIZ + File.separator + seguidor + File.separator + "following.ins";
         ArrayList<Follow> followsExistentes = ManejoArchivosBinarios.leerListaFollows(rutaFollowing);
-
-        boolean encontrado = false;
-        for (Follow f : followsExistentes) {
-            if (f.getUsername().equals(seguido)) {
-                f.setActivo(estado);
-                encontrado = true;
-                break;
-            }
-        }
-        if (!encontrado && estado) {
-            followsExistentes.add(new Follow(seguido));
-        }
-
-        File carpetaSeguidor = new File(Constante.RUTA_BASE + seguidor);
-        if (!carpetaSeguidor.exists()) {
-            carpetaSeguidor.mkdirs();
-        }
+        actualizarListaDeFollows(followsExistentes, seguido, estado);
         ManejoArchivosBinarios.reescribirFollows(rutaFollowing, followsExistentes);
 
-        String rutaFollowers = Constante.RUTA_BASE + seguido + File.separator + "\\followers.ins";
+        String rutaFollowers = RAIZ + File.separator + seguido + File.separator + "followers.ins";
         ArrayList<Follow> followersExistentes = ManejoArchivosBinarios.leerListaFollows(rutaFollowers);
+        actualizarListaDeFollows(followersExistentes, seguidor, estado);
+        ManejoArchivosBinarios.reescribirFollows(rutaFollowers, followersExistentes);
 
-        encontrado = false;
-        for (Follow f : followersExistentes) {
-            if (f.getUsername().equals(seguidor)) {
+        ArrayList<Usuario> todosLosUsuarios = ManejoArchivosBinarios.leerTodosLosUsuarios();
+        for (Usuario u : todosLosUsuarios) {
+            if (u.getUsuario().equalsIgnoreCase(seguidor)) {
+                if (estado) {
+                    if (!u.getSiguiendo().contains(seguido)) {
+                        u.getSiguiendo().add(seguido);
+                    }
+                } else {
+                    u.getSiguiendo().remove(seguido);
+                }
+                break;
+            }
+        }
+        ManejoArchivosBinarios.reescribirListaCompletaUsuarios(todosLosUsuarios);
+    }
+
+    private static void actualizarListaDeFollows(ArrayList<Follow> lista, String user, boolean estado) {
+        boolean encontrado = false;
+        for (Follow f : lista) {
+            if (f.getUsername().equalsIgnoreCase(user)) {
                 f.setActivo(estado);
                 encontrado = true;
                 break;
             }
         }
         if (!encontrado && estado) {
-            followersExistentes.add(new Follow(seguidor));
+            lista.add(new Follow(user));
         }
-
-        File carpetaSeguido = new File(Constante.RUTA_BASE + seguido);
-        if (!carpetaSeguido.exists()) {
-            carpetaSeguido.mkdirs();
-        }
-        ManejoArchivosBinarios.reescribirFollows(rutaFollowers, followersExistentes);
     }
 
     public static ArrayList<Usuario> buscarPersonas(String textoBusqueda, String usuarioLogueado) {
@@ -256,13 +212,8 @@ public class GestorInsta {
 
         try {
             ArrayList<Usuario> todosLosUsuarios = ManejoArchivosBinarios.leerTodosLosUsuarios();
-
-            String rutaFollowing = Constante.RUTA_BASE + usuarioLogueado + "\\following.ins";
-            ArrayList<Follow> seguidos = ManejoArchivosBinarios.leerListaFollows(rutaFollowing);
-
             for (Usuario u : todosLosUsuarios) {
                 boolean contieneTexto = u.getUsuario().toLowerCase().contains(busqueda);
-
                 boolean estaActivo = u.isActivo();
                 boolean diferenteUser = !u.getUsuario().equalsIgnoreCase(usuarioLogueado);
 
@@ -270,7 +221,6 @@ public class GestorInsta {
                     resultados.add(u);
                 }
             }
-
         } catch (IOException e) {
             System.err.println("Error al leer los usuarios para la busqueda: " + e.getMessage());
         }
@@ -278,13 +228,12 @@ public class GestorInsta {
     }
 
     public static boolean estaSiguiendo(String seguidor, String seguido) throws IOException {
-        String rutaFollowing = Constante.RUTA_BASE + seguidor + File.separator + "\\following.ins";
+        String rutaFollowing = RAIZ + File.separator + seguidor + File.separator + "following.ins";
         if (!new File(rutaFollowing).exists()) {
             return false;
         }
 
         ArrayList<Follow> listaFollowing = ManejoArchivosBinarios.leerListaFollows(rutaFollowing);
-
         for (Follow f : listaFollowing) {
             if (f.getUsername().equalsIgnoreCase(seguido) && f.isActivo()) {
                 return true;
@@ -298,7 +247,7 @@ public class GestorInsta {
         ArrayList<Usuario> todos = ManejoArchivosBinarios.leerTodosLosUsuarios();
 
         for (Usuario u : todos) {
-            if (u.getUsuario().equalsIgnoreCase(perfilUsername) && u.isActivo()) {  //cambio de NombreUsuario a Usuario
+            if (u.getUsuario().trim().equalsIgnoreCase(perfilUsername.trim()) && u.isActivo()) {
                 perfil = u;
                 break;
             }
@@ -311,13 +260,12 @@ public class GestorInsta {
         int seguidores = contarFollows(perfilUsername, false);
         int seguidos = contarFollows(perfilUsername, true);
 
-        boolean loSigue = estaSiguiendo(usuarioLogueado, perfilUsername);
+        boolean loSigue = false;
         if (!perfilUsername.equalsIgnoreCase(usuarioLogueado)) {
             loSigue = estaSiguiendo(usuarioLogueado, perfilUsername);
         }
 
-        String claveArchivoPosts = perfil.getUsuario();
-        ArrayList<Insta> instas = ManejoArchivosBinarios.leerInstasDeUsuario(claveArchivoPosts);
+        ArrayList<Insta> instas = ManejoArchivosBinarios.leerInstasDeUsuario(perfil.getUsuario());
         java.util.Collections.sort(instas);
 
         return new DatosPerfil(perfil, seguidores, seguidos, loSigue, instas);
@@ -327,40 +275,14 @@ public class GestorInsta {
 
     public static void publicarInsta(String username, String contenido) throws LongitudInstaInvalida, IOException {
         if (contenido.length() > MAX_CARACTERES_INSTA) {
-            throw new LongitudInstaInvalida("El contenido excede el maximo permitido. Limite: " + MAX_CARACTERES_INSTA, MAX_CARACTERES_INSTA);
+            throw new LongitudInstaInvalida("El contenido excede el maximo permitido.", MAX_CARACTERES_INSTA);
         }
 
         Insta nuevoInsta = new Insta(username, contenido, "");
-        String rutaCompletaArchivo = Constante.RUTA_BASE + username + "\\instas.ins";
+        String rutaCompletaArchivo = RAIZ + File.separator + username + File.separator + "insta.ins";
         ManejoArchivosBinarios.escribirInsta(nuevoInsta, rutaCompletaArchivo);
     }
 
-    /*public static Usuario logIn(String username, String password) throws CredencialesInvalidas, IOException {
-
-        ArrayList<Usuario> todosLosUsuarios = ManejoArchivosBinarios.leerTodosLosUsuarios();
-
-        if (todosLosUsuarios.isEmpty()) {
-            System.err.println("La lista de usuarios está vacía.");
-        }
-
-        String inputUsername = username.trim();
-        String inputPassword = password.trim();
-
-        for (Usuario u : todosLosUsuarios) {
-            if (u.getUsuario().equalsIgnoreCase(inputUsername)
-                    && u.getPassword().equals(inputPassword)) {
-
-                if (!u.isActivo()) {
-                    actualizarEstadoCuenta(u.getUsuario(), true);
-                    u.setActivo(true);
-                    System.out.println("¡Cuenta de " + username + " reactivada exitosamente!");
-                }
-                return u;
-            }
-        }
-        throw new CredencialesInvalidas("Credenciales inválidas: Usuario no encontrado.");
-    }*/
-    
     public static Usuario logIn(String username, String password) throws CredencialesInvalidas, IOException {
         ArrayList<Usuario> lista = ManejoArchivosBinarios.leerTodosLosUsuarios();
         for (Usuario u : lista) {
@@ -380,37 +302,34 @@ public class GestorInsta {
             return null;
         }
 
-        String rutaDestinoCarpeta = "Z" + File.separator + username;
-
+        String rutaDestinoCarpeta = RAIZ + File.separator + username + File.separator + "imagenes";
         File carpeta = new File(rutaDestinoCarpeta);
-        if (!carpeta.exists()) {
-            carpeta.mkdirs();
+
+        if (!carpeta.exists() && !carpeta.mkdirs()) {
+            throw new IOException("Fallo al crear carpeta de imágenes.");
         }
 
-        String nombreBase = "perfil";
-        String nombreFinal = nombreBase + extension;
+        String nombreFinal = "perfil" + extension;
         Path origen = new File(rutaOriginal).toPath();
         Path destino = new File(rutaDestinoCarpeta + File.separator + nombreFinal).toPath();
 
         Files.copy(origen, destino, StandardCopyOption.REPLACE_EXISTING);
 
-        return rutaDestinoCarpeta + File.separator + nombreFinal;
+        return destino.toString();
     }
 
     public static void crearInsta(Insta nuevoPost) throws LongitudInstaInvalida, IOException {
-        final int LONGITUD_MAXIMA = 140;
-        if (nuevoPost.getTexto().length() > LONGITUD_MAXIMA) {
-            throw new LongitudInstaInvalida("El texto es demasiado largo." + nuevoPost.getTexto().length(), nuevoPost.getTexto().length());
+        if (nuevoPost.getTexto().length() > 140) {
+            throw new LongitudInstaInvalida("El texto es demasiado largo.", nuevoPost.getTexto().length());
         }
 
         String autor = nuevoPost.getAutorUsername();
-        String rutaArchivoInstas = Constante.RUTA_BASE + autor + "\\instas.ins";
+        String rutaArchivoInstas = RAIZ + File.separator + autor + File.separator + "insta.ins";
         ManejoArchivosBinarios.escribirInsta(nuevoPost, rutaArchivoInstas);
     }
 
     public static void eliminarInsta(Insta postAEliminar) throws IOException {
         String username = postAEliminar.getAutorUsername();
-
         ArrayList<Insta> instasUsuario = ManejoArchivosBinarios.leerInstasDeUsuario(username);
 
         boolean eliminado = instasUsuario.removeIf(i
@@ -421,38 +340,48 @@ public class GestorInsta {
             throw new IOException("No se encontró el post para eliminar.");
         }
 
-        String rutaArchivoInstas = Constante.RUTA_BASE + username + "\\instas.ins";
+        String rutaArchivoInstas = RAIZ + File.separator + username + File.separator + "insta.ins";
         ManejoArchivosBinarios.reescribirInstas(instasUsuario, rutaArchivoInstas);
     }
 
     public static void guardarComentario(Insta postComentado, Comentario nuevoComentario) throws IOException {
-        String rutaArchivoComentarios = Constante.RUTA_BASE
+        String rutaArchivoComentarios = RAIZ + File.separator
                 + postComentado.getAutorUsername()
-                + "\\comentarios_"
-                + postComentado.getIdPost()
-                + ".ins";
+                + File.separator + "comentarios_" + postComentado.getIdPost() + ".ins";
 
         ManejoArchivosBinarios.escribirComentario(nuevoComentario, rutaArchivoComentarios);
     }
 
     public static ArrayList<Comentario> leerComentarios(Insta postComentado) {
-        String rutaArchivoComentarios = Constante.RUTA_BASE
+        String rutaArchivoComentarios = RAIZ + File.separator
                 + postComentado.getAutorUsername()
-                + "\\comentarios_"
-                + postComentado.getIdPost()
-                + ".ins";
+                + File.separator + "comentarios_" + postComentado.getIdPost() + ".ins";
 
         return ManejoArchivosBinarios.leerComentariosDePost(rutaArchivoComentarios);
     }
 
     public static Usuario buscarUsuarioPorUsername(String username) throws IOException {
         ArrayList<Usuario> listaUsuarios = ManejoArchivosBinarios.leerTodosLosUsuarios();
-
         for (Usuario u : listaUsuarios) {
-            if (u.getUsuario().equalsIgnoreCase(username)) { //cambio de NombreUsuario a Usuario
+            if (u.getUsuario().equalsIgnoreCase(username)) {
                 return u;
             }
         }
         return null;
+    }
+
+    public static void actualizarUsuario(Usuario userModificado) throws IOException {
+        ArrayList<Usuario> todos = leerTodosLosUsuarios();
+        for (int i = 0; i < todos.size(); i++) {
+            if (todos.get(i).getUsuario().equalsIgnoreCase(userModificado.getUsuario())) {
+                todos.set(i, userModificado);
+                break;
+            }
+        }
+        ManejoArchivosBinarios.reescribirListaCompletaUsuarios(todos);
+    }
+
+    public static void guardarListaUsuarios(ArrayList<Usuario> todos) throws IOException {
+        ManejoArchivosBinarios.reescribirListaCompletaUsuarios(todos);
     }
 }

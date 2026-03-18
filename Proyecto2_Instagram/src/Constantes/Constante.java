@@ -13,6 +13,5 @@ import java.io.File;
 
 public class Constante {
     
-    //Ruta base del sistema operativo
     public static final String RUTA_BASE = "INSTA_RAIZ/";
 }

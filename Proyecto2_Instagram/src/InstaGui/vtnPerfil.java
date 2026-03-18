@@ -2,7 +2,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package InstaGUI;
+package InstaGui;
 
 import Logica.GestorInsta;
 import Logica.Usuario;
@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import javax.swing.*;
 import java.awt.*;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import javax.swing.SwingUtilities;
 
@@ -21,21 +22,21 @@ import javax.swing.SwingUtilities;
  *
  * @author HP
  */
-
 public class vtnPerfil extends JPanel {
 
-    private final Color COLOR_FONDO = new Color(18, 18, 18); 
+    private final Color COLOR_FONDO = new Color(18, 18, 18);
     private final Color COLOR_TEXTO = Color.WHITE;
-    private final Color COLOR_SECUNDARIO_TEXTO = new Color(150, 150, 150); 
-    private final Color COLOR_BOTON_DOMINANTE = new Color(193, 53, 132); 
-    private final Color COLOR_BOTON_FONDO = new Color(38, 38, 38); 
-    private final Color COLOR_BORDE_POST = new Color(50, 50, 50); 
-    
+    private final Color COLOR_SECUNDARIO_TEXTO = new Color(150, 150, 150);
+    private final Color COLOR_BOTON_DOMINANTE = new Color(193, 53, 132);
+    private final Color COLOR_BOTON_FONDO = new Color(38, 38, 38);
+    private final Color COLOR_BORDE_POST = new Color(50, 50, 50);
+
     private final Usuario usuarioActual;
     private JLabel labelFollowings, labelFollowers, labelPosts;
     private JPanel panelPostPropios;
     private JLabel labelFotoPerfil;
     private final vtnInstaPrincipal vtnP;
+    private JLabel labelUsuario, labelNombre, labelEdad, labelGenero, labelDesde, labelBio;
 
     public vtnPerfil(Usuario usuario, vtnInstaPrincipal vtnP) {
         this.usuarioActual = usuario;
@@ -49,19 +50,19 @@ public class vtnPerfil extends JPanel {
     }
 
     private void volverALogin() {
-        SesionManager.cerrarSesion(); 
-        
-        vtnP.dispose(); 
-        
+        SesionManager.cerrarSesion();
+
+        vtnP.dispose();
+
         SwingUtilities.invokeLater(() -> {
-            Login login = new Login(); 
+            Login login = new Login();
             login.setVisible(true);
         });
     }
-    
+
     private void inicializarComponentes() {
         setLayout(new BorderLayout(10, 10));
-        
+
         JPanel panelTopBar = new JPanel(new BorderLayout());
         panelTopBar.setBackground(COLOR_FONDO);
         panelTopBar.setBorder(BorderFactory.createEmptyBorder(10, 10, 0, 10));
@@ -77,24 +78,24 @@ public class vtnPerfil extends JPanel {
         btnVolver.addActionListener(e -> {
             volverALogin();
         });
-        
+
         JPanel panelTituloWrapper = new JPanel(new FlowLayout(FlowLayout.CENTER));
         panelTituloWrapper.setBackground(COLOR_FONDO);
         JLabel labelTituloPerfil = new JLabel("Mi Perfil");
         labelTituloPerfil.setFont(new Font("Arial", Font.BOLD, 20));
         labelTituloPerfil.setForeground(COLOR_TEXTO);
         panelTituloWrapper.add(labelTituloPerfil);
-        
+
         panelTopBar.add(btnVolver, BorderLayout.WEST);
         panelTopBar.add(panelTituloWrapper, BorderLayout.CENTER);
-        
+
         JPanel panelNorthWrapper = new JPanel();
         panelNorthWrapper.setLayout(new BoxLayout(panelNorthWrapper, BoxLayout.Y_AXIS));
         panelNorthWrapper.setBackground(COLOR_FONDO);
         panelNorthWrapper.add(panelTopBar);
-        
+
         JPanel panelInfoPerfil = new JPanel();
-        panelInfoPerfil.setLayout(new BoxLayout(panelInfoPerfil, BoxLayout.Y_AXIS)); 
+        panelInfoPerfil.setLayout(new BoxLayout(panelInfoPerfil, BoxLayout.Y_AXIS));
         panelInfoPerfil.setBorder(BorderFactory.createEmptyBorder(15, 15, 10, 15));
         panelInfoPerfil.setBackground(COLOR_FONDO);
 
@@ -108,31 +109,33 @@ public class vtnPerfil extends JPanel {
         labelFotoPerfil.setVerticalAlignment(SwingConstants.CENTER);
         labelFotoPerfil.setForeground(COLOR_SECUNDARIO_TEXTO);
         labelFotoPerfil.setAlignmentY(Component.TOP_ALIGNMENT);
-        
+
         JPanel panelDatos = new JPanel();
         panelDatos.setLayout(new BoxLayout(panelDatos, BoxLayout.Y_AXIS));
         panelDatos.setBackground(COLOR_FONDO);
         panelDatos.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
 
-        JLabel labelUsuario = new JLabel("<html><b style='color:" + toHex(COLOR_TEXTO) + "; font-size: 14pt;'>@" + usuarioActual.getUsuario() + "</b></html>"); //cambio de NombreUsuario a Usuario
-        JLabel labelNombre = new JLabel("Nombre: " + usuarioActual.getUsuario()); 
-        JLabel labelEdad = new JLabel("Edad: " + usuarioActual.getEdad());
-        JLabel labelGenero = new JLabel("Genero: " + usuarioActual.getGenero());
-        JLabel labelDesde = new JLabel("Desde: "+usuarioActual.getFechaIngreso());
-        
+        labelUsuario = new JLabel("<html><b style='color:" + toHex(COLOR_TEXTO) + "; font-size: 14pt;'>@</b></html>");
+        labelNombre = new JLabel("Nombre: ");
+        labelBio = new JLabel("");
+        labelEdad = new JLabel("Edad: ");
+        labelGenero = new JLabel("Genero: ");
+        labelDesde = new JLabel("Desde: ");
+
         labelUsuario.setAlignmentX(Component.LEFT_ALIGNMENT);
         labelNombre.setAlignmentX(Component.LEFT_ALIGNMENT);
         labelEdad.setAlignmentX(Component.LEFT_ALIGNMENT);
         labelGenero.setAlignmentX(Component.LEFT_ALIGNMENT);
         labelDesde.setAlignmentX(Component.LEFT_ALIGNMENT);
-        
+
         labelNombre.setForeground(COLOR_TEXTO);
         labelEdad.setForeground(COLOR_TEXTO);
         labelGenero.setForeground(COLOR_TEXTO);
         labelDesde.setForeground(COLOR_SECUNDARIO_TEXTO);
-        
+
         panelDatos.add(labelUsuario);
         panelDatos.add(labelNombre);
+        panelDatos.add(labelBio);
         panelDatos.add(labelEdad);
         panelDatos.add(labelGenero);
         panelDatos.add(labelDesde);
@@ -140,47 +143,47 @@ public class vtnPerfil extends JPanel {
 
         panelFotoYDatos.add(labelFotoPerfil, BorderLayout.WEST);
         panelFotoYDatos.add(panelDatos, BorderLayout.CENTER);
-        
+
         JPanel panelStatsYContadores = new JPanel(new GridLayout(1, 3, 10, 0));
         panelStatsYContadores.setBackground(COLOR_FONDO);
-        panelStatsYContadores.setBorder(BorderFactory.createEmptyBorder(15, 0, 15, 0)); 
+        panelStatsYContadores.setBorder(BorderFactory.createEmptyBorder(15, 0, 15, 0));
 
         labelPosts = crearContador("Posts", 0);
         labelFollowers = crearContador("Followers", 0);
-        labelFollowings = crearContador("Following", 0); 
+        labelFollowings = crearContador("Following", 0);
 
         panelStatsYContadores.add(labelPosts);
         panelStatsYContadores.add(labelFollowers);
         panelStatsYContadores.add(labelFollowings);
-        
+
         panelInfoPerfil.add(panelFotoYDatos);
         panelInfoPerfil.add(panelStatsYContadores);
 
         panelNorthWrapper.add(panelInfoPerfil);
         add(panelNorthWrapper, BorderLayout.NORTH);
-        
+
         JPanel panelContenidoCentral = new JPanel(new BorderLayout());
         panelContenidoCentral.setBackground(COLOR_FONDO);
 
         JPanel panelAccionYTitulo = new JPanel();
         panelAccionYTitulo.setLayout(new BoxLayout(panelAccionYTitulo, BoxLayout.Y_AXIS));
-        panelAccionYTitulo.setBorder(BorderFactory.createEmptyBorder(0, 15, 10, 15)); 
+        panelAccionYTitulo.setBorder(BorderFactory.createEmptyBorder(0, 15, 10, 15));
         panelAccionYTitulo.setBackground(COLOR_FONDO);
 
         JButton btnAccion = new JButton("EDITAR PERFIL");
         btnAccion.addActionListener(e -> abrirOpciones(usuarioActual));
         btnAccion.setAlignmentX(Component.CENTER_ALIGNMENT);
-        
-        btnAccion.setBackground(new Color(60, 60, 60)); 
+
+        btnAccion.setBackground(new Color(60, 60, 60));
         btnAccion.setForeground(COLOR_TEXTO);
         btnAccion.setBorder(BorderFactory.createLineBorder(COLOR_BORDE_POST, 1));
         btnAccion.setFocusPainted(false);
         btnAccion.setPreferredSize(new Dimension(200, 30));
-        btnAccion.setMaximumSize(new Dimension(500, 30)); 
-        
-        panelAccionYTitulo.add(btnAccion); 
+        btnAccion.setMaximumSize(new Dimension(500, 30));
+
+        panelAccionYTitulo.add(btnAccion);
         panelAccionYTitulo.add(Box.createVerticalStrut(15));
-        
+
         JSeparator separadorPrincipal = new JSeparator(SwingConstants.HORIZONTAL);
         separadorPrincipal.setAlignmentX(Component.CENTER_ALIGNMENT);
         separadorPrincipal.setMaximumSize(new Dimension(500, 2));
@@ -193,7 +196,7 @@ public class vtnPerfil extends JPanel {
         labelTituloPosts.setFont(new Font("Arial", Font.BOLD, 16));
         labelTituloPosts.setAlignmentX(Component.CENTER_ALIGNMENT);
         labelTituloPosts.setForeground(COLOR_TEXTO);
-        
+
         panelAccionYTitulo.add(labelTituloPosts);
         panelAccionYTitulo.add(Box.createVerticalStrut(10));
 
@@ -202,7 +205,7 @@ public class vtnPerfil extends JPanel {
         panelPostPropios = new JPanel();
         panelPostPropios.setLayout(new BoxLayout(panelPostPropios, BoxLayout.Y_AXIS));
         panelPostPropios.setBackground(COLOR_FONDO);
-        
+
         JScrollPane scrollPosts = new JScrollPane(panelPostPropios);
         scrollPosts.setBorder(BorderFactory.createEmptyBorder());
         scrollPosts.setBackground(COLOR_FONDO);
@@ -210,26 +213,41 @@ public class vtnPerfil extends JPanel {
         panelContenidoCentral.add(scrollPosts, BorderLayout.CENTER);
         add(panelContenidoCentral, BorderLayout.CENTER);
     }
-    
+
     private String toHex(Color c) {
         return String.format("#%02x%02x%02x", c.getRed(), c.getGreen(), c.getBlue());
     }
 
-    private void abrirOpciones(Usuario usuario){
+    public void actualizarContenido(Logica.DatosPerfil datos) {
+        Usuario u = datos.getDatosGenerales();
+
+        labelUsuario.setText("<html><b style='color:" + toHex(COLOR_TEXTO) + "; font-size: 14pt;'>@" + u.getUsuario() + "</b></html>");
+        labelNombre.setText("Nombre: " + u.getNombre());
+        labelBio.setText("<html><i style='color:gray;'>" + (u.getBio() == null ? "Sin bio" : u.getBio()) + "</i></html>");
+        labelEdad.setText("Edad: " + u.getEdad());
+        labelGenero.setText("Genero: " + u.getGenero());
+
+        java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("dd/MM/yyyy");
+        labelDesde.setText("Desde: " + sdf.format(u.getFechaIngreso()));
+
+        cargarDatosPerfil();
+    }
+
+    private void abrirOpciones(Usuario usuario) {
         vtnOpcionesUsuario opc = new vtnOpcionesUsuario(usuario, vtnP);
         opc.setLocationRelativeTo(this);
         opc.setVisible(true);
         cargarDatosPerfil();
     }
-    
+
     private JLabel crearContador(String titulo, int valor) {
         JPanel p = new JPanel(new BorderLayout());
-        p.setBackground(COLOR_FONDO); 
-        
+        p.setBackground(COLOR_FONDO);
+
         JLabel labelValor = new JLabel(String.valueOf(valor));
         labelValor.setFont(new Font("Arial", Font.BOLD, 18));
         labelValor.setHorizontalAlignment(SwingConstants.CENTER);
-        labelValor.setForeground(COLOR_TEXTO); 
+        labelValor.setForeground(COLOR_TEXTO);
 
         JLabel labelTitulo = new JLabel(titulo);
         labelTitulo.setHorizontalAlignment(SwingConstants.CENTER);
@@ -258,8 +276,8 @@ public class vtnPerfil extends JPanel {
         ArrayList<Insta> postPropios = new ArrayList<>();
         int numPosts = 0;
         try {
-            followings = GestorInsta.contarFollows(usuarioActual.getUsuario(), true); //true para labelFollowings  //cambio de NombreUsuario a Usuario
-            followers = GestorInsta.contarFollows(usuarioActual.getUsuario(), false); //false para los labelFollowers  //cambio de NombreUsuario a Usuario
+            followings = GestorInsta.contarFollows(usuarioActual.getUsuario(), true); 
+            followers = GestorInsta.contarFollows(usuarioActual.getUsuario(), false); 
             postPropios = ManejoArchivosBinarios.leerInstasDeUsuario(usuarioActual.getUsuario());
             numPosts = postPropios.size();
 
@@ -268,15 +286,14 @@ public class vtnPerfil extends JPanel {
             if (labelPosts != null) {
                 labelPosts.setText(String.format(format, numPosts, "Posts"));
             }
-            
-            if(labelFollowers!=null){
+
+            if (labelFollowers != null) {
                 labelFollowers.setText(String.format(format, followers, "Followers"));
             }
-            
-            if(labelFollowings!=null){
+
+            if (labelFollowings != null) {
                 labelFollowings.setText(String.format(format, followings, "Followings"));
             }
-            
 
         } catch (IOException e) {
             JOptionPane.showMessageDialog(this, "Error al cargar contadores o posts: " + e.getMessage());
@@ -350,10 +367,10 @@ public class vtnPerfil extends JPanel {
 
         JPanel panelIzquierdo = new JPanel(new FlowLayout(FlowLayout.LEFT));
         panelIzquierdo.setBackground(COLOR_FONDO);
-        
+
         JLabel labelAutor = new JLabel("<html><b style='color:" + toHex(COLOR_TEXTO) + ";'>@" + post.getAutorUsername() + " </b></html>");
         panelIzquierdo.add(labelAutor);
-        
+
         JLabel labelFecha = new JLabel(" - " + post.getFechaPublicacion().toString());
         labelFecha.setForeground(COLOR_SECUNDARIO_TEXTO);
         panelIzquierdo.add(labelFecha);
@@ -362,7 +379,7 @@ public class vtnPerfil extends JPanel {
 
         if (post.getAutorUsername().equals(usuarioActual.getUsuario())) {
             JButton btnEliminar = new JButton("X");
-            btnEliminar.setForeground(COLOR_SECUNDARIO_TEXTO); 
+            btnEliminar.setForeground(COLOR_SECUNDARIO_TEXTO);
             btnEliminar.setBackground(COLOR_FONDO);
             btnEliminar.setBorderPainted(false);
             btnEliminar.setToolTipText("Eliminar este post");
@@ -409,10 +426,10 @@ public class vtnPerfil extends JPanel {
             areaTexto.setEditable(false);
             areaTexto.setLineWrap(true);
             areaTexto.setWrapStyleWord(true);
-            
+
             areaTexto.setBackground(COLOR_FONDO);
             areaTexto.setForeground(COLOR_TEXTO);
-            
+
             areaTexto.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
             areaTexto.setAlignmentX(Component.CENTER_ALIGNMENT);
             areaTexto.setMaximumSize(new Dimension(480, areaTexto.getPreferredSize().height));
@@ -437,26 +454,24 @@ public class vtnPerfil extends JPanel {
         areaComentarios.setEditable(false);
         areaComentarios.setWrapStyleWord(true);
         areaComentarios.setLineWrap(true);
-        
+
         areaComentarios.setBackground(COLOR_FONDO);
         areaComentarios.setForeground(COLOR_SECUNDARIO_TEXTO);
-        
+
         JScrollPane scrollComentarios = new JScrollPane(areaComentarios);
         scrollComentarios.setPreferredSize(new Dimension(500, 80));
-        scrollComentarios.setBorder(BorderFactory.createEmptyBorder()); 
-        
+        scrollComentarios.setBorder(BorderFactory.createEmptyBorder());
+
         JPanel panelAgregar = new JPanel(new BorderLayout(5, 5));
         panelAgregar.setBackground(COLOR_FONDO);
-        
+
         JTextField txtComentario = new JTextField();
         JButton btnComentar = new JButton("Comentar");
-        
 
         txtComentario.setBackground(COLOR_BOTON_FONDO);
         txtComentario.setForeground(COLOR_TEXTO);
         txtComentario.setCaretColor(COLOR_TEXTO);
         txtComentario.setBorder(BorderFactory.createLineBorder(COLOR_BORDE_POST));
-
 
         btnComentar.setBackground(COLOR_FONDO);
         btnComentar.setForeground(COLOR_BOTON_DOMINANTE);
@@ -464,7 +479,7 @@ public class vtnPerfil extends JPanel {
 
         btnComentar.addActionListener(e -> {
             agregarComentario(post, txtComentario.getText());
-            txtComentario.setText(""); 
+            txtComentario.setText("");
         });
 
         panelAgregar.add(txtComentario, BorderLayout.CENTER);
@@ -498,7 +513,7 @@ public class vtnPerfil extends JPanel {
     private void agregarComentario(Insta post, String texto) {
         if (!texto.trim().isEmpty()) {
             try {
-                String autor = SesionManager.getUsuarioActual().getUsuario(); //cambio de NombreUsuario a Usuario
+                String autor = SesionManager.getUsuarioActual().getUsuario(); 
                 Comentario nuevoComentario = new Comentario(autor, texto);
 
                 GestorInsta.guardarComentario(post, nuevoComentario);
@@ -524,7 +539,7 @@ public class vtnPerfil extends JPanel {
                 GestorInsta.eliminarInsta(post);
                 JOptionPane.showMessageDialog(this, "Post eliminado exitosamente.");
                 cargarDatosPerfil();
-                vtnP.refrescarVistas(); 
+                vtnP.refrescarVistas();
             } catch (IOException e) {
                 JOptionPane.showMessageDialog(this, "Error al eliminar el post: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
             }

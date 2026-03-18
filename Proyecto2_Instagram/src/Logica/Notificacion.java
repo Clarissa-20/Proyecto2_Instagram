@@ -11,6 +11,8 @@ import java.io.Serializable;
  * @author HP
  */
 public class Notificacion implements Serializable{
+    private static final long serialVersionUID = 1L;
+    
     public enum Tipo{
         SOLICITUD_NUEVA, SOLICITUD_ACEPTADA
     }

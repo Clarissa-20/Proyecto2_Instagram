@@ -2,7 +2,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package InstaGUI;
+package InstaGui;
 
 /**
  *
@@ -34,7 +34,6 @@ public class vtnOpcionesUsuario extends JDialog implements ActionListener {
         this.usuarioActual = usuario;
         this.vtnP = vtnP;
 
-        // Aplicar estilos a la ventana
         getContentPane().setBackground(COLOR_FONDO);
         
         inicializarComponentes();
@@ -51,7 +50,6 @@ public class vtnOpcionesUsuario extends JDialog implements ActionListener {
         String estado = usuarioActual.isActivo() ? "DESACTIVAR Cuenta" : "ACTIVAR Cuenta";
         btnDesactivar = new JButton(estado);
 
-        // Aplicar estilos a los botones
         styleButton(btnBuscar, false);
         styleButton(btnEntrar, false);
         styleButton(btnDesactivar, usuarioActual.isActivo()); 

@@ -2,7 +2,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package InstaGUI;
+package InstaGui;
 
 import Logica.DatosPerfil;
 import Logica.GestorInsta;
@@ -11,11 +11,15 @@ import Logica.PerfilNoEncontrado;
 import Logica.SesionManager;
 import Logica.Usuario;
 import Logica.Comentario;
+import Logica.Notificacion;
 import java.awt.*;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import javax.swing.*;
+import java.text.SimpleDateFormat;
+import javax.swing.border.EmptyBorder;
 
 /**
  *
@@ -32,12 +36,15 @@ public class PerfilPanel extends JPanel {
     private final Color COLOR_UNFOLLOW = new Color(80, 80, 80);
 
     private String usernamePerfil;
-    private JLabel username, nombre, edad, genero, fecha;
+    private JLabel username, nombre, edad, genero, fecha, bio;
     private JButton btnAccion;
     private JPanel panelPosts;
+    private vtnInstaPrincipal vtnP;
 
-    public PerfilPanel(String usernamePerfil) {
+    public PerfilPanel(String usernamePerfil, vtnInstaPrincipal vtnP) {
         this.usernamePerfil = usernamePerfil;
+        this.vtnP = vtnP;
+
         setLayout(new BorderLayout());
         setBackground(COLOR_FONDO);
 
@@ -68,36 +75,19 @@ public class PerfilPanel extends JPanel {
     }
 
     public void cargarDatosYRenderizar() {
-        /*removeAll();
-        try {
-            String usuarioLogueado = SesionManager.getUsuarioActual().getUsuario(); //cambio de NombreUsuario a Usuario
-            DatosPerfil datos = GestorInsta.obtenerPefilCompleto(usernamePerfil, usuarioLogueado);
-            add(crearEncabezadoPerfil(datos, usuarioLogueado), BorderLayout.NORTH);
-            add(crearListaPublicaciones(datos.getInstasPropios()), BorderLayout.CENTER);
-
-        } catch (PerfilNoEncontrado e) {
-            JLabel errorLabel = new JLabel("<html><h1 style='color:" + toHex(COLOR_TEXTO) + ";'>Error: Perfil no encontrado<h1><p style='color:" + toHex(COLOR_SECUNDARIO_TEXTO) + ";'>" + e.getMessage() + "<p></html>", SwingConstants.CENTER);
-            errorLabel.setBackground(COLOR_FONDO);
-            add(errorLabel, BorderLayout.CENTER);
-        } catch (IOException e) {
-            JLabel errorLabel = new JLabel("<html><h1 style='color:" + toHex(COLOR_TEXTO) + ";'>Error de Archivos<h1><p style='color:" + toHex(COLOR_SECUNDARIO_TEXTO) + ";'>No se pudieron cargar los datos del perfil<p></html>", SwingConstants.CENTER);
-            errorLabel.setBackground(COLOR_FONDO);
-            add(errorLabel, BorderLayout.CENTER);
-        } catch (Exception e) {
-            JLabel errorLabel = new JLabel("Error: " + e.getMessage(), SwingConstants.CENTER);
-            errorLabel.setForeground(Color.RED);
-            add(errorLabel, BorderLayout.CENTER);
-        }
-        revalidate();
-        repaint();*/
-
         removeAll();
-        setLayout(new BorderLayout()); // Aseguramos el layout
+        setLayout(new BorderLayout());
         setBackground(COLOR_FONDO);
 
         try {
             String usuarioLogueado = SesionManager.getUsuarioActual().getUsuario();
+
+            if (usernamePerfil.equalsIgnoreCase(usuarioLogueado)) {
+                Usuario refrescado = GestorInsta.buscarUsuarioPorUsername(usuarioLogueado);
+                SesionManager.setUsuarioActual(refrescado);
+            }
             DatosPerfil datos = GestorInsta.obtenerPefilCompleto(usernamePerfil, usuarioLogueado);
+
             Usuario usuarioObjetivo = datos.getDatosGenerales();
 
             add(crearEncabezadoPerfil(datos, usuarioLogueado), BorderLayout.NORTH);
@@ -153,7 +143,7 @@ public class PerfilPanel extends JPanel {
 
         return panelPrivado;
     }
-    
+
     private void mostrarErrorVisual(String titulo, String mensaje) {
         JLabel errorLabel = new JLabel("<html><center><h1 style='color:white;'>" + titulo + "</h1>"
                 + "<p style='color:gray;'>" + mensaje + "</p></center></html>", SwingConstants.CENTER);
@@ -163,65 +153,91 @@ public class PerfilPanel extends JPanel {
     private JPanel crearEncabezadoPerfil(DatosPerfil datos, String usuarioLogueado) {
 
         JPanel panelPrincipal = new JPanel(new BorderLayout(10, 10));
-        panelPrincipal.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
-        panelPrincipal.setBackground(COLOR_FONDO); // Fondo oscuro
+        panelPrincipal.setBorder(BorderFactory.createEmptyBorder(15, 15, 10, 15));
+        panelPrincipal.setBackground(COLOR_FONDO);
 
-        JPanel panelInfoSuperior = new JPanel(new BorderLayout(30, 0));
+        JPanel panelInfoSuperior = new JPanel(new FlowLayout(FlowLayout.LEFT, 15, 0));
         panelInfoSuperior.setBackground(COLOR_FONDO);
 
-        JPanel panelDatosGenerales = new JPanel();
-        panelDatosGenerales.setBackground(COLOR_FONDO);
-
         JLabel labelFotoPerfil = new JLabel();
-        labelFotoPerfil.setPreferredSize(new Dimension(150, 150));
+        labelFotoPerfil.setPreferredSize(new Dimension(100, 100));
         labelFotoPerfil.setBorder(BorderFactory.createLineBorder(COLOR_BORDE_POST, 1));
         labelFotoPerfil.setHorizontalAlignment(SwingConstants.CENTER);
         labelFotoPerfil.setVerticalAlignment(SwingConstants.CENTER);
         labelFotoPerfil.setForeground(COLOR_SECUNDARIO_TEXTO);
 
         String rutaFoto = datos.getDatosGenerales().getRutaFotoPerfil();
+        System.out.println("DEBUG: Intentando cargar foto para @" + datos.getDatosGenerales().getUsuario());
+        System.out.println("DEBUG: La ruta recuperada es: [" + rutaFoto + "]");
+        labelFotoPerfil.setBorder(null);
 
         if (rutaFoto != null && !rutaFoto.isEmpty() && new java.io.File(rutaFoto).exists()) {
             try {
                 ImageIcon icono = new ImageIcon(rutaFoto);
-                Image img = icono.getImage().getScaledInstance(150, 150, Image.SCALE_SMOOTH);
+                Image img = icono.getImage().getScaledInstance(100, 100, Image.SCALE_SMOOTH);
                 labelFotoPerfil.setIcon(new ImageIcon(img));
                 labelFotoPerfil.setText(null);
+
             } catch (Exception ex) {
-                labelFotoPerfil.setText("Error cargando foto");
+                labelFotoPerfil.setText("Error foto");
             }
         } else {
             labelFotoPerfil.setText("Sin foto");
             labelFotoPerfil.setBackground(COLOR_BOTON_FONDO);
             labelFotoPerfil.setOpaque(true);
         }
-        panelInfoSuperior.add(labelFotoPerfil, BorderLayout.WEST);
+ 
+        panelInfoSuperior.add(labelFotoPerfil);
 
-        panelDatosGenerales.setLayout(new BoxLayout(panelDatosGenerales, BoxLayout.Y_AXIS));
+        JPanel panelDatos = new JPanel();
+        panelDatos.setLayout(new BoxLayout(panelDatos, BoxLayout.Y_AXIS));
+        panelDatos.setBackground(COLOR_FONDO);
 
-        username = new JLabel("<html><h1 style='color:" + toHex(COLOR_TEXTO) + ";'>@" + datos.getDatosGenerales().getUsuario() + "</h1></html>"); //cambio de NombreUsuario a Usuario
-        panelDatosGenerales.add(username);
-        panelDatosGenerales.add(Box.createVerticalStrut(5));
+        username = new JLabel("@" + datos.getDatosGenerales().getUsuario());
+        username.setFont(new Font("Arial", Font.BOLD, 16));
+        username.setForeground(COLOR_TEXTO);
 
-        nombre = new JLabel("Nombre: " + datos.getDatosGenerales().getUsuario());
-        edad = new JLabel("Edad: " + datos.getDatosGenerales().getEdad());
-        genero = new JLabel("Genero: " + datos.getDatosGenerales().getGenero());
-        fecha = new JLabel("Desde: " + datos.getDatosGenerales().getFechaIngreso());  //cambio de FechaEntrada a FechaIngreso
-
+        nombre = new JLabel("Nombre: " + datos.getDatosGenerales().getNombre());
+        nombre.setFont(new Font("Arial", Font.BOLD, 13));
         nombre.setForeground(COLOR_TEXTO);
+
+        String textoBio = (datos.getDatosGenerales().getBio() != null ? datos.getDatosGenerales().getBio() : "Sin biografía");
+        bio = new JLabel("<html><i>" + textoBio + "</i></html>");
+        bio.setFont(new Font("Arial", Font.BOLD, 13));
+        bio.setForeground(Color.LIGHT_GRAY);
+
+        edad = new JLabel("Edad: " + datos.getDatosGenerales().getEdad());
+        edad.setFont(new Font("Arial", Font.BOLD, 13));
         edad.setForeground(COLOR_TEXTO);
+
+        genero = new JLabel("Genero: " + datos.getDatosGenerales().getGenero());
+        genero.setFont(new Font("Arial", Font.BOLD, 13));
         genero.setForeground(COLOR_TEXTO);
+
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+        String fechaTexto = sdf.format(datos.getDatosGenerales().getFechaIngreso());
+        fecha = new JLabel("Desde: " + fechaTexto);
+        fecha.setFont(new Font("Arial", Font.BOLD, 12));
         fecha.setForeground(COLOR_SECUNDARIO_TEXTO);
 
-        panelDatosGenerales.add(nombre);
-        panelDatosGenerales.add(edad);
-        panelDatosGenerales.add(genero);
-        panelDatosGenerales.add(fecha);
-        panelDatosGenerales.add(Box.createVerticalGlue());
+        username.setAlignmentX(Component.LEFT_ALIGNMENT);
+        nombre.setAlignmentX(Component.LEFT_ALIGNMENT);
+        bio.setAlignmentX(Component.LEFT_ALIGNMENT);
+        edad.setAlignmentX(Component.LEFT_ALIGNMENT);
+        genero.setAlignmentX(Component.LEFT_ALIGNMENT);
+        fecha.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        panelDatosGenerales.setAlignmentX(Component.LEFT_ALIGNMENT);
+        panelDatos.add(username);
+        panelDatos.add(Box.createVerticalStrut(2));
+        panelDatos.add(nombre);
+        panelDatos.add(Box.createVerticalStrut(2));
+        panelDatos.add(bio);
+        panelDatos.add(Box.createVerticalStrut(5));
+        panelDatos.add(edad);
+        panelDatos.add(genero);
+        panelDatos.add(fecha);
 
-        panelInfoSuperior.add(panelDatosGenerales, BorderLayout.CENTER);
+        panelInfoSuperior.add(panelDatos);
 
         JPanel panelCentral = new JPanel();
         panelCentral.setLayout(new BoxLayout(panelCentral, BoxLayout.Y_AXIS));
@@ -232,29 +248,32 @@ public class PerfilPanel extends JPanel {
         separador.setBackground(COLOR_FONDO);
         separador.setForeground(COLOR_BORDE_POST);
         panelCentral.add(separador);
-        panelCentral.add(Box.createVerticalStrut(20));
+
+        panelCentral.add(Box.createVerticalStrut(15));
 
         JPanel panelContadores = new JPanel(new GridLayout(1, 3, 20, 0));
         panelContadores.setBackground(COLOR_FONDO);
         panelContadores.add(crearContador("Posts", datos.getInstasPropios().size()));
         panelContadores.add(crearContador("Followers", datos.getTotalSeguidores()));
         panelContadores.add(crearContador("Following", datos.getTotalSeguidos()));
-
         panelContadores.setAlignmentX(Component.CENTER_ALIGNMENT);
         panelCentral.add(panelContadores);
-        panelCentral.add(Box.createVerticalStrut(20));
+
+        panelCentral.add(Box.createVerticalStrut(15));
+
+        JPanel panelBotonesAccion = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 0));
+        panelBotonesAccion.setBackground(COLOR_FONDO);
 
         if (usernamePerfil.equalsIgnoreCase(usuarioLogueado)) {
             btnAccion = new JButton("EDITAR PERFIL");
             btnAccion.addActionListener(e -> mostrarOpcionesEdicion(datos.getDatosGenerales()));
-
             btnAccion.setBackground(COLOR_BOTON_FONDO);
             btnAccion.setForeground(COLOR_TEXTO);
             btnAccion.setBorder(BorderFactory.createLineBorder(COLOR_BORDE_POST, 1));
-
+            panelBotonesAccion.add(btnAccion);
         } else {
             if (datos.getloSigueElUsuarioActual()) {
-                btnAccion = new JButton("DEJAR DE SEGUIR");
+                btnAccion = new JButton("SIGUIENDO");
                 btnAccion.setBackground(COLOR_UNFOLLOW);
                 btnAccion.setForeground(COLOR_TEXTO);
                 btnAccion.setBorder(BorderFactory.createLineBorder(COLOR_BORDE_POST, 1));
@@ -262,17 +281,32 @@ public class PerfilPanel extends JPanel {
                 btnAccion = new JButton("SEGUIR");
                 btnAccion.setBackground(COLOR_BOTON_DOMINANTE);
                 btnAccion.setForeground(Color.WHITE);
+                btnAccion.setFont(new Font("Arial", Font.BOLD, 12));
                 btnAccion.setBorderPainted(false);
             }
             btnAccion.addActionListener(e -> manejarFollow(usuarioLogueado, usernamePerfil, datos.getloSigueElUsuarioActual()));
-            btnAccion.setPreferredSize(new Dimension(200, 30));
+            btnAccion.setPreferredSize(new Dimension(140, 30));
+            panelBotonesAccion.add(btnAccion);
+
+            try {
+                boolean elMeSigue = GestorInsta.estaSiguiendo(usernamePerfil, usuarioLogueado);
+                if (datos.getloSigueElUsuarioActual() && elMeSigue) {
+                    JButton btnMensaje = new JButton("MENSAJE");
+                    btnMensaje.setBackground(COLOR_BOTON_FONDO);
+                    btnMensaje.setForeground(COLOR_TEXTO);
+                    btnMensaje.setBorder(BorderFactory.createLineBorder(COLOR_BORDE_POST, 1));
+                    btnMensaje.setPreferredSize(new Dimension(140, 30));
+                    btnMensaje.setFocusPainted(false);
+                    btnMensaje.addActionListener(e -> vtnP.abrirChatCon(usernamePerfil));
+                    panelBotonesAccion.add(btnMensaje);
+                }
+            } catch (IOException ignored) {
+            }
         }
 
         btnAccion.setFocusPainted(false);
-        btnAccion.setMaximumSize(new Dimension(500, btnAccion.getPreferredSize().height));
+        panelCentral.add(panelBotonesAccion);
 
-        btnAccion.setAlignmentX(Component.CENTER_ALIGNMENT);
-        panelCentral.add(btnAccion);
         panelCentral.add(Box.createVerticalStrut(20));
 
         JSeparator separador2 = new JSeparator(SwingConstants.HORIZONTAL);
@@ -480,10 +514,9 @@ public class PerfilPanel extends JPanel {
     }
 
     private void agregarComentario(Insta post, String texto, JTextArea areaComentarios, JTextField txtComentario) {
-        // LÓGICA ORIGINAL
         if (!texto.trim().isEmpty()) {
             try {
-                String autor = SesionManager.getUsuarioActual().getUsuario(); //cambio de NombreUsuario a Usuario
+                String autor = SesionManager.getUsuarioActual().getUsuario(); 
                 Comentario nuevoComentario = new Comentario(autor, texto);
 
                 GestorInsta.guardarComentario(post, nuevoComentario);
@@ -603,22 +636,76 @@ public class PerfilPanel extends JPanel {
 
     private void manejarFollow(String seguidor, String seguido, boolean esSiguiendo) {
         try {
-            if (esSiguiendo) {
-                int confirmacion = JOptionPane.showConfirmDialog(this,
-                        "¿Desea dejar de seguir a " + seguido + "?", "Confirmar Unfollow", JOptionPane.YES_NO_OPTION);
+            Usuario usuarioObjetivo = GestorInsta.buscarUsuarioPorUsername(seguido);
+            Usuario miUsuario = SesionManager.getUsuarioActual(); // El usuario que está usando la app
 
+            if (esSiguiendo) {
+                int confirmacion = JOptionPane.showConfirmDialog(this, "¿Desea dejar de seguir a " + seguido + "?", "Confirmar Unfollow", JOptionPane.YES_NO_OPTION);
                 if (confirmacion == JOptionPane.YES_OPTION) {
                     GestorInsta.actualizarEstadoFollow(seguidor, seguido, false);
+
+                    miUsuario.getSiguiendo().remove(seguido);
+                    GestorInsta.actualizarUsuario(miUsuario);
+
                     JOptionPane.showMessageDialog(this, "Has dejado de seguir a " + seguido + ".");
                     cargarDatosYRenderizar();
                 }
             } else {
-                GestorInsta.actualizarEstadoFollow(seguidor, seguido, true);
-                JOptionPane.showMessageDialog(this, "Ahora sigues a " + seguido + ".");
-                cargarDatosYRenderizar();
+                if (usuarioObjetivo.isEsPublico()) {
+                    GestorInsta.actualizarEstadoFollow(seguidor, seguido, true);
+
+                    if (!miUsuario.getSiguiendo().contains(seguido)) {
+                        miUsuario.getSiguiendo().add(seguido);
+                    }
+                    GestorInsta.actualizarUsuario(miUsuario);
+
+                    enviarSolicitudSeguimiento(seguidor, seguido, Notificacion.Tipo.SOLICITUD_ACEPTADA);
+
+                    JOptionPane.showMessageDialog(this, "Ahora sigues a " + seguido + ".");
+                    cargarDatosYRenderizar();
+                } else {
+                    enviarSolicitudSeguimiento(seguidor, seguido, Notificacion.Tipo.SOLICITUD_NUEVA);
+                    JOptionPane.showMessageDialog(this, "Solicitud enviada.");
+
+                    int resp = JOptionPane.showConfirmDialog(this,
+                            "MODO PRUEBA: ¿Deseas que @" + seguido + " acepte la solicitud de @" + seguidor + " ahora?",
+                            "Simular Aceptación", JOptionPane.YES_NO_OPTION);
+
+                    if (resp == JOptionPane.YES_OPTION) {
+                        ejecutarAceptacion(seguidor, seguido);
+                    }
+                }
             }
         } catch (IOException e) {
-            JOptionPane.showMessageDialog(this, "Error al actualizar el estado de seguimiento");
+            JOptionPane.showMessageDialog(this, "Error al procesar el seguimiento: " + e.getMessage());
         }
     }
+
+    private void enviarSolicitudSeguimiento(String emisor, String receptor, Notificacion.Tipo tipo) {
+        try {
+            if (vtnP.getSalidaSocket() != null) {
+                Notificacion n = new Notificacion(emisor, receptor, tipo);
+                vtnP.getSalidaSocket().writeObject(n);
+                vtnP.getSalidaSocket().flush();
+            }
+        } catch (IOException e) {
+            System.err.println("Error enviando notificación: " + e.getMessage());
+        }
+    }
+
+    private void ejecutarAceptacion(String seguidor, String seguido) {
+        try {
+            GestorInsta.actualizarEstadoFollow(seguidor, seguido, true);
+
+            enviarSolicitudSeguimiento(seguido, seguidor, Notificacion.Tipo.SOLICITUD_ACEPTADA);
+
+            JOptionPane.showMessageDialog(this, "¡Has aceptado la solicitud de @" + seguidor + "!");
+
+            cargarDatosYRenderizar();
+        } catch (IOException ex) {
+            JOptionPane.showMessageDialog(this, "Error al aceptar: " + ex.getMessage());
+        }
+    }
+
+    
 }

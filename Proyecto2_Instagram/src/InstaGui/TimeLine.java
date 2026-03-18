@@ -2,7 +2,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package InstaGUI;
+package InstaGui;
 
 import Logica.Usuario;
 import Logica.Comentario;
@@ -62,7 +62,7 @@ public class TimeLine extends JPanel {
         panelContenido.setBorder(BorderFactory.createEmptyBorder(10, 50, 10, 50)); 
 
         try {
-            ArrayList<Insta> timeLine = GestorInsta.generarTimeLine(usuarioActual.getUsuario()); //cambio de NombreUsuario a Usuario
+            ArrayList<Insta> timeLine = GestorInsta.generarTimeLine(usuarioActual.getUsuario()); 
 
             if (timeLine.isEmpty()) {
                 JLabel labelVacio = new JLabel("Aun no sigues a nadie o no hay post para mostrar.", SwingConstants.CENTER);
@@ -83,7 +83,7 @@ public class TimeLine extends JPanel {
                     if (i < timeLine.size() - 1) {
                         JSeparator separator = new JSeparator(SwingConstants.HORIZONTAL);
                         separator.setBackground(COLOR_FONDO);
-                        separator.setForeground(COLOR_BORDE_POST); // Separador sutil
+                        separator.setForeground(COLOR_BORDE_POST); 
                         separator.setMaximumSize(new Dimension(500, 1));
                         separator.setAlignmentX(Component.CENTER_ALIGNMENT);
                         
@@ -107,7 +107,7 @@ public class TimeLine extends JPanel {
         JPanel panel = new JPanel();
         panel.setBorder(BorderFactory.createLineBorder(COLOR_BORDE_POST, 1));
         panel.setLayout(new BorderLayout(10, 10));
-        panel.setBackground(COLOR_FONDO); // Fondo oscuro
+        panel.setBackground(COLOR_FONDO); 
 
         JPanel panelHeader = new JPanel(new FlowLayout(FlowLayout.LEFT));
         panelHeader.setBackground(COLOR_FONDO);
@@ -207,7 +207,7 @@ public class TimeLine extends JPanel {
         txtComentario.setBorder(BorderFactory.createLineBorder(COLOR_BORDE_POST));
         
         btnComentar.setBackground(COLOR_FONDO);
-        btnComentar.setForeground(COLOR_BOTON_DOMINANTE); // Color rosa/púrpura
+        btnComentar.setForeground(COLOR_BOTON_DOMINANTE); 
         btnComentar.setBorderPainted(false);
         
         btnComentar.addActionListener(e -> {
@@ -243,7 +243,7 @@ public class TimeLine extends JPanel {
     private void agregarComentario(Insta post, String texto, JTextArea areaComentarios, JTextField txtComentario) {
         if (!texto.trim().isEmpty()) {
             try {
-                String autor = SesionManager.getUsuarioActual().getUsuario(); //cambio de NombreUsuario a Usuario
+                String autor = SesionManager.getUsuarioActual().getUsuario(); 
                 Comentario nuevoComentario = new Comentario(autor, texto);
 
                 GestorInsta.guardarComentario(post, nuevoComentario);

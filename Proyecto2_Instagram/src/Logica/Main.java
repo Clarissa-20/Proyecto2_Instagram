@@ -4,7 +4,7 @@
  */
 package Logica;
 
-import InstaGUI.Login;
+import InstaGui.Login;
 
 /**
  *

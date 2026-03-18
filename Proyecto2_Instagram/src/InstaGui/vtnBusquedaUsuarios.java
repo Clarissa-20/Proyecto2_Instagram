@@ -2,7 +2,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package InstaGUI;
+package InstaGui;
 
 /**
  *
@@ -101,7 +101,7 @@ public class vtnBusquedaUsuarios extends JDialog {
             labelVacio.setForeground(COLOR_SECUNDARIO_TEXTO);
             panelResultados.add(labelVacio);
         } else {
-            ArrayList<Usuario> resultados = GestorInsta.buscarPersonas(texto, usuarioActual.getUsuario()); //cambio de NombreUsuario a Usuario
+            ArrayList<Usuario> resultados = GestorInsta.buscarPersonas(texto, usuarioActual.getUsuario()); 
 
             if (resultados.isEmpty()) {
                 JLabel labelNoEncontrado = new JLabel("No se encontraron usuarios activos que coincidan con '" + texto + "'.");
@@ -140,7 +140,7 @@ public class vtnBusquedaUsuarios extends JDialog {
         panelDatos.setBackground(COLOR_BOTON_FONDO);
         panelDatos.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
 
-        panelDatos.add(new JLabel("<html><b style='color:" + toHex(COLOR_TEXTO) + ";'>@" + usuarioEncontrado.getUsuario() + "</b></html>")); //cambio de NombreUsuario a Usuario
+        panelDatos.add(new JLabel("<html><b style='color:" + toHex(COLOR_TEXTO) + ";'>@" + usuarioEncontrado.getUsuario() + "</b></html>")); 
         JLabel lblNombre = new JLabel("Nombre: " + usuarioEncontrado.getUsuario());
         lblNombre.setForeground(COLOR_SECUNDARIO_TEXTO);
         panelDatos.add(lblNombre);
@@ -161,7 +161,7 @@ public class vtnBusquedaUsuarios extends JDialog {
         JButton btnFollow = new JButton();
         actualizarBotonFollow(btnFollow, usuarioEncontrado.getUsuario()); 
 
-        btnFollow.addActionListener(e -> manejarFollow(usuarioEncontrado.getUsuario(), btnFollow)); //cambio de NombreUsuario a Usuario
+        btnFollow.addActionListener(e -> manejarFollow(usuarioEncontrado.getUsuario(), btnFollow));
 
         panelAccion.add(btnFollow);
 
@@ -174,7 +174,7 @@ public class vtnBusquedaUsuarios extends JDialog {
     private void actualizarBotonFollow(JButton btnFollow, String usernameObjetivo) {
         boolean siguiendo = false;
         try {
-            siguiendo = GestorInsta.estaSiguiendo(usuarioActual.getUsuario(), usernameObjetivo); //cambio de NombreUsuario a Usuario
+            siguiendo = GestorInsta.estaSiguiendo(usuarioActual.getUsuario(), usernameObjetivo); 
         } catch (IOException e) {
             JOptionPane.showMessageDialog(this, "Error al verificar el estado de seguimiento: " + e.getMessage(), "Error de E/S", JOptionPane.ERROR_MESSAGE);
         }
@@ -203,15 +203,15 @@ public class vtnBusquedaUsuarios extends JDialog {
         panelDatos.setBackground(COLOR_BOTON_FONDO);
         panelDatos.setBorder(BorderFactory.createEmptyBorder(10, 5, 10, 5));
 
-        JLabel lblUsername = new JLabel("<html><b style='color:" + toHex(COLOR_TEXTO) + ";'>@" + usuarioEncontrado.getUsuario() + "</b></html>"); //cambio de NombreUsuario a Usuario
+        JLabel lblUsername = new JLabel("<html><b style='color:" + toHex(COLOR_TEXTO) + ";'>@" + usuarioEncontrado.getUsuario() + "</b></html>"); 
         panelDatos.add(lblUsername);
 
         JPanel panelAccion = new JPanel(new FlowLayout(FlowLayout.RIGHT, 5, 5));
         panelAccion.setBackground(COLOR_BOTON_FONDO);
 
         JButton btnFollow = new JButton();
-        actualizarBotonFollow(btnFollow, usuarioEncontrado.getUsuario()); //cambio de NombreUsuario a Usuario
-        btnFollow.addActionListener(e -> manejarFollow(usuarioEncontrado.getUsuario(), btnFollow)); //cambio de NombreUsuario a Usuario
+        actualizarBotonFollow(btnFollow, usuarioEncontrado.getUsuario()); 
+        btnFollow.addActionListener(e -> manejarFollow(usuarioEncontrado.getUsuario(), btnFollow)); 
 
         JButton btnEntrar = new JButton("ENTRAR");
         btnEntrar.setBackground(COLOR_BOTON_DOMINANTE);
@@ -220,7 +220,7 @@ public class vtnBusquedaUsuarios extends JDialog {
         btnEntrar.setBorderPainted(false);
 
         btnEntrar.addActionListener(e -> {
-            String otroUser = usuarioEncontrado.getUsuario(); //cambio de NombreUsuario a Usuario
+            String otroUser = usuarioEncontrado.getUsuario(); 
             vtnP.mostrarOtroPerfil(otroUser);
             dispose();
         });
@@ -238,9 +238,9 @@ public class vtnBusquedaUsuarios extends JDialog {
         boolean siguiendo;
         boolean nuevoEstado;
         try {
-            siguiendo = GestorInsta.estaSiguiendo(this.usuarioActual.getUsuario(), usernameObjetivo); //cambio de NombreUsuario a Usuario
+            siguiendo = GestorInsta.estaSiguiendo(this.usuarioActual.getUsuario(), usernameObjetivo);
             nuevoEstado = !siguiendo;
-            GestorInsta.actualizarEstadoFollow(usuarioActual.getUsuario(), usernameObjetivo, nuevoEstado);  //cambio de NombreUsuario a Usuario
+            GestorInsta.actualizarEstadoFollow(usuarioActual.getUsuario(), usernameObjetivo, nuevoEstado);  
             actualizarBotonFollow(btnFollow, usernameObjetivo);
 
             if (vtnP != null) {

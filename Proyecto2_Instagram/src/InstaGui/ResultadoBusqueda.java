@@ -2,7 +2,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package InstaGUI;
+package InstaGui;
 
 /**
  *
@@ -124,7 +124,7 @@ public class ResultadoBusqueda extends JPanel {
         Font font = new Font("Arial", Font.PLAIN, 14);
         Color textColor = Color.WHITE;
         
-        JLabel lblUsername = new JLabel("Username: @" + usuarioObjetivo.getUsuario()); //cambio de NombreUsuario a Usuario
+        JLabel lblUsername = new JLabel("Username: @" + usuarioObjetivo.getUsuario()); 
         lblUsername.setForeground(textColor);
         lblUsername.setFont(font);
         panelInfo.add(lblUsername);
@@ -144,7 +144,7 @@ public class ResultadoBusqueda extends JPanel {
         lblGenero.setFont(font);
         panelInfo.add(lblGenero);
         
-        JLabel lblFecha = new JLabel("Fecha Ingreso: " + usuarioObjetivo.getFechaIngreso()); //cambio de FechaEntrada a getFechaIngreso
+        JLabel lblFecha = new JLabel("Fecha Ingreso: " + usuarioObjetivo.getFechaIngreso());
         lblFecha.setForeground(textColor);
         lblFecha.setFont(font);
         panelInfo.add(lblFecha);

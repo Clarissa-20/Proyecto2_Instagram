@@ -47,7 +47,7 @@ public class Mensaje implements Serializable{
         return fecha;
     }
     
-    public boolean getEsSticker(){
+    public boolean isEsSticker(){
         return esSticker;
     }
     
@@ -55,7 +55,7 @@ public class Mensaje implements Serializable{
         this.esSticker = esSticker;
     }
     
-    public boolean esImagen(){
+    public boolean isEsImagen(){
         return esImagen;
     }
     

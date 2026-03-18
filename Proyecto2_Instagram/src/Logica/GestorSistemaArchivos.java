@@ -25,11 +25,6 @@ public class GestorSistemaArchivos {
             throw new IOException("Fallo la creación del directorio base: " + rutaBaseUsuario); 
         }
         
-        String[] carpetasBasicas = {"Mis Documentos", "Musica", "Mis Imagenes"};
-        for(String nombreCarpeta : carpetasBasicas){
-            new File(rutaBaseUsuario, nombreCarpeta).mkdir();
-        }
-        
         try{
             new FileOutputStream(rutaBaseUsuario+"\\following.ins").close();
             new FileOutputStream(rutaBaseUsuario+"\\followers.ins").close();

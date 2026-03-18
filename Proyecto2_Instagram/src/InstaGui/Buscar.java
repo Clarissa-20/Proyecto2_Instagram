@@ -2,39 +2,42 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package InstaGUI;
+package InstaGui;
 
 import Logica.GestorInsta;
 import Logica.Insta;
 import Logica.Usuario;
 import Logica.Comentario;
+import Logica.ManejoArchivosBinarios;
 import Logica.SesionManager;
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import javax.swing.*;
+
 /**
  *
  * @author HP
  */
+public class Buscar extends JPanel {
 
-public class Buscar extends JPanel{
-        private final Color COLOR_FONDO = new Color(18, 18, 18); 
+    private final Color COLOR_FONDO = new Color(18, 18, 18);
     private final Color COLOR_TEXTO = Color.WHITE;
-    private final Color COLOR_SECUNDARIO_TEXTO = new Color(150, 150, 150); 
-    private final Color COLOR_BOTON_DOMINANTE = new Color(193, 53, 132); 
-    private final Color COLOR_BOTON_FONDO = new Color(38, 38, 38); 
-    private final Color COLOR_BORDE_POST = new Color(50, 50, 50); 
-    
+    private final Color COLOR_SECUNDARIO_TEXTO = new Color(150, 150, 150);
+    private final Color COLOR_BOTON_DOMINANTE = new Color(193, 53, 132);
+    private final Color COLOR_BOTON_FONDO = new Color(38, 38, 38);
+    private final Color COLOR_BORDE_POST = new Color(50, 50, 50);
+
     private final Usuario usuarioActual;
     private final vtnInstaPrincipal vtnP;
-    
+
     private JRadioButton rbHashtag;
     private JRadioButton rbMenciones;
+    private JRadioButton rbPersonas;
     private JTextField txtTerminoBusqueda;
     private JButton btnBuscar;
-    
+
     private JPanel panelResultados;
 
     public Buscar(Usuario usuario, vtnInstaPrincipal principal) {
@@ -42,11 +45,11 @@ public class Buscar extends JPanel{
         this.vtnP = principal;
         setLayout(new BorderLayout(10, 10));
         setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
-        setBackground(COLOR_FONDO); 
-        
+        setBackground(COLOR_FONDO);
+
         inicializarComponentes();
     }
-    
+
     private String toHex(Color c) {
         return String.format("#%02x%02x%02x", c.getRed(), c.getGreen(), c.getBlue());
     }
@@ -54,78 +57,92 @@ public class Buscar extends JPanel{
     private void inicializarComponentes() {
         JPanel panelControl = new JPanel(new BorderLayout(10, 10));
         panelControl.setBackground(COLOR_FONDO);
-        
+
         JPanel panelOpciones = new JPanel(new FlowLayout(FlowLayout.LEFT));
         panelOpciones.setBackground(COLOR_FONDO);
-        
+
         rbHashtag = new JRadioButton("Buscar por Hashtag (#)", true);
-        rbMenciones = new JRadioButton("Mis Menciones (@" + usuarioActual.getUsuario() + ")");  //cambio de NombreUsuario a Usuario
-        
+        rbMenciones = new JRadioButton("Mis Menciones (@" + usuarioActual.getUsuario() + ")"); 
+
+        rbPersonas = new JRadioButton("Personas (@)", false);
+        rbPersonas.setBackground(COLOR_FONDO);
+        rbPersonas.setForeground(COLOR_TEXTO);
+
         rbHashtag.setBackground(COLOR_FONDO);
         rbHashtag.setForeground(COLOR_TEXTO);
         rbMenciones.setBackground(COLOR_FONDO);
         rbMenciones.setForeground(COLOR_TEXTO);
-        
+
         ButtonGroup grupoBusqueda = new ButtonGroup();
         grupoBusqueda.add(rbHashtag);
         grupoBusqueda.add(rbMenciones);
-        
+        grupoBusqueda.add(rbPersonas);
+
         panelOpciones.add(rbHashtag);
         panelOpciones.add(rbMenciones);
-        
+        panelOpciones.add(rbPersonas);
+
         JPanel panelAccion = new JPanel(new BorderLayout(5, 5));
         panelAccion.setBackground(COLOR_FONDO);
-        
+
         txtTerminoBusqueda = new JTextField("Ingrese #hashtag o @username");
         btnBuscar = new JButton("Buscar");
-        
+
         txtTerminoBusqueda.setBackground(COLOR_BOTON_FONDO);
         txtTerminoBusqueda.setForeground(COLOR_TEXTO);
         txtTerminoBusqueda.setCaretColor(COLOR_TEXTO);
         txtTerminoBusqueda.setBorder(BorderFactory.createLineBorder(COLOR_BORDE_POST));
-        
+
         btnBuscar.setBackground(COLOR_BOTON_DOMINANTE);
         btnBuscar.setForeground(Color.WHITE);
         btnBuscar.setFocusPainted(false);
         btnBuscar.setBorderPainted(false);
-        
+
         panelAccion.add(txtTerminoBusqueda, BorderLayout.CENTER);
         panelAccion.add(btnBuscar, BorderLayout.EAST);
-        
+
         panelControl.add(panelOpciones, BorderLayout.NORTH);
         panelControl.add(panelAccion, BorderLayout.SOUTH);
-        
+
         add(panelControl, BorderLayout.NORTH);
-        
+
         panelResultados = new JPanel();
         panelResultados.setLayout(new BoxLayout(panelResultados, BoxLayout.Y_AXIS));
         panelResultados.setBackground(COLOR_FONDO);
-        
+
         JScrollPane scrollResultados = new JScrollPane(panelResultados);
         scrollResultados.getViewport().setBackground(COLOR_FONDO);
-        scrollResultados.setBorder(BorderFactory.createEmptyBorder()); 
+        scrollResultados.setBorder(BorderFactory.createEmptyBorder());
         add(scrollResultados, BorderLayout.CENTER);
-        
+
         rbMenciones.addActionListener(e -> {
             txtTerminoBusqueda.setEnabled(false);
-            txtTerminoBusqueda.setBackground(COLOR_BOTON_FONDO.darker()); 
+            txtTerminoBusqueda.setBackground(COLOR_BOTON_FONDO.darker());
             btnBuscar.setText("Ver Menciones");
         });
-        
+
         rbHashtag.addActionListener(e -> {
             txtTerminoBusqueda.setEnabled(true);
             txtTerminoBusqueda.setBackground(COLOR_BOTON_FONDO);
             btnBuscar.setText("Buscar");
         });
-        
+
+        rbPersonas.addActionListener(e -> {
+            txtTerminoBusqueda.setEnabled(true);
+            txtTerminoBusqueda.setBackground(COLOR_BOTON_FONDO);
+            btnBuscar.setText("Buscar Persona");
+        });
+
         btnBuscar.addActionListener(e -> {
             if (rbHashtag.isSelected()) {
                 buscarHashtag();
             } else if (rbMenciones.isSelected()) {
                 buscarMenciones();
+            } else if (rbPersonas.isSelected()) {
+                buscarPersonas();
             }
         });
-        
+
         rbHashtag.setSelected(true);
         txtTerminoBusqueda.setEnabled(true);
         btnBuscar.setText("Buscar");
@@ -143,26 +160,90 @@ public class Buscar extends JPanel{
             mostrarResultados(resultados, "Resultados para: " + termino);
 
         } catch (IOException e) {
-             JOptionPane.showMessageDialog(this, "Error de E/S al buscar posts: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Error de E/S al buscar posts: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 
     private void buscarMenciones() {
-        String miUsername = usuarioActual.getUsuario(); //cambio de NombreUsuario a Usuario
+        String miUsername = usuarioActual.getUsuario(); 
         try {
             ArrayList<Insta> resultados = GestorInsta.buscarPorMencion(miUsername);
-            mostrarResultados(resultados, "Posts que te mencionan (@" + usuarioActual.getUsuario() + ")"); //cambio de NombreUsuario a Usuario
+            mostrarResultados(resultados, "Posts que te mencionan (@" + usuarioActual.getUsuario() + ")"); 
 
         } catch (IOException e) {
-             JOptionPane.showMessageDialog(this, "Error de E/S al buscar menciones: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Error de E/S al buscar menciones: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
+    }
+
+    private void buscarPersonas() {
+        String termino = txtTerminoBusqueda.getText().trim().toLowerCase();
+        if (termino.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Ingrese un nombre de usuario.");
+            return;
+        }
+
+        if (termino.startsWith("@")) {
+            termino = termino.substring(1);
+        }
+
+        try {
+            ArrayList<Usuario> todos = ManejoArchivosBinarios.cargarUsuarios();
+            if(todos==null){
+                todos = new ArrayList<>();
+            }
+            
+            ArrayList<Usuario> filtrados = new ArrayList<>();
+
+            for (Usuario u : todos) {
+                if (u.getUsuario().toLowerCase().contains(termino) && u.isActivo()) {
+                    filtrados.add(u);
+                }
+            }
+            mostrarResultadosUsuarios(filtrados);
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Error al buscar personas.");
+        }
+    }
+
+    private void mostrarResultadosUsuarios(ArrayList<Usuario> usuarios) {
+        panelResultados.removeAll();
+        if (usuarios.isEmpty()) {
+            JLabel labelNo = new JLabel("No se encontraron usuarios activos.");
+            labelNo.setForeground(COLOR_SECUNDARIO_TEXTO);
+            panelResultados.add(labelNo);
+        } else {
+            for (Usuario u : usuarios) {
+                JPanel pU = new JPanel(new BorderLayout(10, 0));
+                pU.setBackground(COLOR_BOTON_FONDO);
+                pU.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+                pU.setMaximumSize(new Dimension(500, 60));
+
+                JLabel lblName = new JLabel("@" + u.getUsuario() + " - " + u.getNombre());
+                lblName.setForeground(COLOR_TEXTO);
+
+                JButton btnVer = new JButton("Ver Perfil");
+                btnVer.setBackground(COLOR_BOTON_DOMINANTE);
+                btnVer.setForeground(Color.WHITE);
+
+                btnVer.addActionListener(e -> {
+                    vtnP.cargarPerfilAjeno(u);
+                });
+
+                pU.add(lblName, BorderLayout.CENTER);
+                pU.add(btnVer, BorderLayout.EAST);
+
+                panelResultados.add(pU);
+                panelResultados.add(Box.createVerticalStrut(10));
+            }
+        }
+        panelResultados.revalidate();
+        panelResultados.repaint();
     }
 
     private void mostrarResultados(ArrayList<Insta> resultados, String titulo) {
         panelResultados.removeAll();
         panelResultados.setBackground(COLOR_FONDO);
-        
-        // Título de Resultados
+
         JLabel labelTitulo = new JLabel("<html><h2 style='color:" + toHex(COLOR_TEXTO) + ";'>" + titulo + "</h2></html>");
         labelTitulo.setAlignmentX(Component.CENTER_ALIGNMENT);
         panelResultados.add(labelTitulo);
@@ -175,48 +256,48 @@ public class Buscar extends JPanel{
             panelResultados.add(labelNoResultados);
         } else {
             final int anchoPost = 500;
-             for (Insta post : resultados) {
-                 
-                 try {
-                     JPanel postPanel = crearPanelPost(post); 
-                     
-                     postPanel.setMaximumSize(new Dimension(anchoPost, Integer.MAX_VALUE));
-                     postPanel.setAlignmentX(Component.CENTER_ALIGNMENT);
-                     
-                     panelResultados.add(postPanel);
-                     panelResultados.add(Box.createVerticalStrut(15));
-                 } catch (Exception ex) {
-                     JPanel errorPanel = new JPanel();
-                     errorPanel.setBackground(COLOR_FONDO);
-                     JLabel labelError = new JLabel("Error al cargar post de @" + post.getAutorUsername());
-                     labelError.setForeground(Color.RED);
-                     errorPanel.add(labelError);
-                     panelResultados.add(errorPanel);
-                     System.err.println("Error al cargar el post en BuscarPanel: " + ex.getMessage());
-                 }
+            for (Insta post : resultados) {
+
+                try {
+                    JPanel postPanel = crearPanelPost(post);
+
+                    postPanel.setMaximumSize(new Dimension(anchoPost, Integer.MAX_VALUE));
+                    postPanel.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+                    panelResultados.add(postPanel);
+                    panelResultados.add(Box.createVerticalStrut(15));
+                } catch (Exception ex) {
+                    JPanel errorPanel = new JPanel();
+                    errorPanel.setBackground(COLOR_FONDO);
+                    JLabel labelError = new JLabel("Error al cargar post de @" + post.getAutorUsername());
+                    labelError.setForeground(Color.RED);
+                    errorPanel.add(labelError);
+                    panelResultados.add(errorPanel);
+                    System.err.println("Error al cargar el post en BuscarPanel: " + ex.getMessage());
+                }
             }
         }
 
         panelResultados.revalidate();
         panelResultados.repaint();
     }
-    
+
     private JPanel crearPanelPost(Insta post) {
         JPanel panel = new JPanel();
         panel.setBorder(BorderFactory.createLineBorder(COLOR_BORDE_POST, 1));
         panel.setLayout(new BorderLayout(10, 10));
-        panel.setBackground(COLOR_FONDO); 
+        panel.setBackground(COLOR_FONDO);
 
         JPanel panelHeader = new JPanel(new FlowLayout(FlowLayout.LEFT));
         panelHeader.setBackground(COLOR_FONDO);
-        
+
         JLabel labelAutor = new JLabel("<html><b style='color:" + toHex(COLOR_TEXTO) + ";'>@" + post.getAutorUsername() + "</b></html>");
         panelHeader.add(labelAutor);
-        
+
         JLabel labelFecha = new JLabel(" - " + post.getFechaPublicacion().toString());
         labelFecha.setForeground(COLOR_SECUNDARIO_TEXTO);
         panelHeader.add(labelFecha);
-        
+
         panel.add(panelHeader, BorderLayout.NORTH);
 
         JPanel panelCuerpo = new JPanel();
@@ -227,7 +308,6 @@ public class Buscar extends JPanel{
         labelImg.setForeground(COLOR_SECUNDARIO_TEXTO);
         labelImg.setBackground(COLOR_BOTON_FONDO);
         labelImg.setOpaque(true);
-
 
         String rutaImg = post.getRutaImg();
         if (rutaImg != null && !rutaImg.isEmpty() && new File(rutaImg).exists()) {
@@ -255,10 +335,10 @@ public class Buscar extends JPanel{
             areaTexto.setEditable(false);
             areaTexto.setLineWrap(true);
             areaTexto.setWrapStyleWord(true);
-            
+
             areaTexto.setBackground(COLOR_FONDO);
             areaTexto.setForeground(COLOR_TEXTO);
-            
+
             areaTexto.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
             areaTexto.setAlignmentX(Component.CENTER_ALIGNMENT);
             areaTexto.setMaximumSize(new Dimension(480, areaTexto.getPreferredSize().height));
@@ -283,7 +363,7 @@ public class Buscar extends JPanel{
         areaComentarios.setWrapStyleWord(true);
         areaComentarios.setLineWrap(true);
         areaComentarios.setFont(new Font("Arial", Font.PLAIN, 10));
-        
+
         areaComentarios.setBackground(COLOR_FONDO);
         areaComentarios.setForeground(COLOR_SECUNDARIO_TEXTO);
 
@@ -296,7 +376,7 @@ public class Buscar extends JPanel{
 
         JPanel panelAgregar = new JPanel(new BorderLayout(5, 5));
         panelAgregar.setBackground(COLOR_FONDO);
-        
+
         JTextField txtComentario = new JTextField();
         JButton btnComentar = new JButton("Comentar");
 
@@ -304,11 +384,11 @@ public class Buscar extends JPanel{
         txtComentario.setForeground(COLOR_TEXTO);
         txtComentario.setCaretColor(COLOR_TEXTO);
         txtComentario.setBorder(BorderFactory.createLineBorder(COLOR_BORDE_POST));
-        
+
         btnComentar.setBackground(COLOR_FONDO);
         btnComentar.setForeground(COLOR_BOTON_DOMINANTE);
         btnComentar.setBorderPainted(false);
-        
+
         btnComentar.addActionListener(e -> {
             agregarComentario(post, txtComentario.getText(), areaComentarios, txtComentario);
         });
@@ -342,7 +422,7 @@ public class Buscar extends JPanel{
     private void agregarComentario(Insta post, String texto, JTextArea areaComentarios, JTextField txtComentario) {
         if (!texto.trim().isEmpty()) {
             try {
-                String autor = SesionManager.getUsuarioActual().getUsuario(); //cambio de NombreUsuario a Usuario
+                String autor = SesionManager.getUsuarioActual().getUsuario(); 
                 Comentario nuevoComentario = new Comentario(autor, texto);
 
                 GestorInsta.guardarComentario(post, nuevoComentario);
@@ -358,4 +438,3 @@ public class Buscar extends JPanel{
         }
     }
 }
-
